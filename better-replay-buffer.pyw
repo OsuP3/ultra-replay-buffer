@@ -153,3 +153,5 @@ keyboard.add_hotkey(keybind, check_for_new_files)
 
 print(f"Press {keybind} to check for new files in '{WATCH_DIR}' for 60 seconds.")
 
+while True:
+    pass
