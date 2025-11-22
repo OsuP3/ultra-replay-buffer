@@ -405,4 +405,7 @@ echo.
 echo Setup complete! 
 echo Start better-replay-buffer.pyw and you should be set! 
 echo Make sure you're executing with pythonw.exe (make sure theres the w after python)
+echo.
+echo Press any key to exit...
+pause >NUL
 exit /b 0
