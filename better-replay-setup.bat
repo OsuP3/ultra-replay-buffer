@@ -25,8 +25,21 @@ REM Get Python version
 for /f "tokens=2" %%v in ('python --version 2^>^&1') do set PYTHON_VERSION=%%v
 echo Found Python version: %PYTHON_VERSION%
 
-REM Get Python executable location
-for /f "tokens=*" %%p in ('where python 2^>NUL') do set PYTHON_EXE=%%p
+REM Get Python executable location - avoid Microsoft Store wrapper
+set PYTHON_EXE=
+REM Try to find real Python installation first
+for /f "tokens=*" %%p in ('where python 2^>NUL') do (
+	echo %%p | findstr /i "WindowsApps" >NUL
+	if !ERRORLEVEL! NEQ 0 (
+		if not defined PYTHON_EXE set PYTHON_EXE=%%p
+	)
+)
+REM Fallback to any python if no real installation found
+if not defined PYTHON_EXE (
+	for /f "tokens=*" %%p in ('where python 2^>NUL') do (
+		if not defined PYTHON_EXE set PYTHON_EXE=%%p
+	)
+)
 if defined PYTHON_EXE (
     echo Python executable: %PYTHON_EXE%
 ) else (
@@ -406,6 +419,28 @@ echo Setup complete!
 echo Start better-replay-buffer.pyw and you should be set! 
 echo Make sure you're executing with pythonw.exe (make sure theres the w after python)
 echo.
-echo Press any key to exit...
-pause >NUL
+echo Press y to start script, anything else to quit: 
+choice /c yn /n /m ""
+if !ERRORLEVEL! EQU 1 (
+	echo Starting Better OBS Replay Buffer...
+	REM Use pythonw to run without console window
+	if defined PYTHON_EXE (
+		REM Get the directory of the detected Python and use pythonw from same location
+		for %%i in ("!PYTHON_EXE!") do set PYTHON_DIR=%%~dpi
+		set PYTHONW_EXE=!PYTHON_DIR!pythonw.exe
+		if exist "!PYTHONW_EXE!" (
+			start "" "!PYTHONW_EXE!" "!SCRIPT_DIR!better-replay-buffer.pyw"
+			echo Using: !PYTHONW_EXE!
+		) else (
+			echo WARN: pythonw.exe not found in same directory, using default
+			start "" pythonw "!SCRIPT_DIR!better-replay-buffer.pyw"
+		)
+	) else (
+		start "" pythonw "!SCRIPT_DIR!better-replay-buffer.pyw"
+	)
+	echo Replay buffer started in background!
+    echo Exiting script...
+    timeout /t 5 >NUL
+)
+
 exit /b 0
