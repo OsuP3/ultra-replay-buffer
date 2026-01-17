@@ -5,3 +5,5 @@ Only works with OBS Version <32.0.0 as a necessary tag was removed. please use O
 Works with Python 3.11, there are two automatic package downloads.
 
 You can set your preferences in the settings.txt file.
+
+P.S. Add: --scene "name-of-your-scene" to obs args in settings.txt if you want it to start with a specific scene.
