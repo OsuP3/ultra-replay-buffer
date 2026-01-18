@@ -43,9 +43,11 @@ def run_service():
         pass
 
     # -------------------------------
-    # Logging
+    # Logging (use AppData for write access)
     # -------------------------------
-    LOG_FILE = os.path.join(EXE_DIR, "better-replay-buffer.log")
+    APPDATA_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("TEMP", ".")), "BetterReplayBuffer")
+    os.makedirs(APPDATA_DIR, exist_ok=True)
+    LOG_FILE = os.path.join(APPDATA_DIR, "better-replay-buffer.log")
     logger = logging.getLogger("better-replay-buffer")
     logger.setLevel(logging.INFO)
     handler = RotatingFileHandler(LOG_FILE, maxBytes=1_000_000, backupCount=3, encoding="utf-8")
@@ -132,9 +134,9 @@ def run_service():
         winsound = None
 
     # -------------------------------
-    # Settings
+    # Settings (stored in AppData for write access)
     # -------------------------------
-    SETTINGS_FILE = os.path.join(EXE_DIR, "settings.txt")
+    SETTINGS_FILE = os.path.join(APPDATA_DIR, "settings.txt")
 
     def read_settings(path):
         settings = {}

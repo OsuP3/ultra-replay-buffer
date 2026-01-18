@@ -30,12 +30,15 @@ def run_gui():
         SERVICE_CMD = [sys.executable, os.path.join(EXE_DIR, "service.py")]
         SERVICE_EXE = None
 
-    SETTINGS_FILE = os.path.join(EXE_DIR, "settings.txt")
+    # Store settings in AppData (writeable without admin)
+    APPDATA_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("TEMP", ".")), "BetterReplayBuffer")
+    os.makedirs(APPDATA_DIR, exist_ok=True)
+    SETTINGS_FILE = os.path.join(APPDATA_DIR, "settings.txt")
     TEMP = os.getenv("TEMP") or os.getenv("TMP") or "."
     REFRESH_FILE = os.path.join(TEMP, "obs_toast.refresh")
     PID_FILE = os.path.join(TEMP, "obs_toast.pid")
     LOCK_FILE = os.path.join(TEMP, "obs_toast.lock")
-    FIRST_RUN_FILE = os.path.join(EXE_DIR, ".setup_done")
+    FIRST_RUN_FILE = os.path.join(APPDATA_DIR, ".setup_done")
 
     # Startup shortcut path
     STARTUP_FOLDER = os.path.join(os.getenv("APPDATA"), r"Microsoft\Windows\Start Menu\Programs\Startup")
@@ -232,42 +235,24 @@ def run_gui():
         return os.path.exists(STARTUP_SHORTCUT)
 
     def enable_startup():
-        """Create startup shortcut using Python's win32com (faster than PowerShell)"""
+        """Create startup shortcut to launch the service"""
         try:
             if getattr(sys, 'frozen', False):
-                target_path = sys.executable
-                arguments = "--service"
+                # Launch the service exe directly on startup
+                target_path = os.path.join(EXE_DIR, "BetterReplayBufferService.exe")
+                arguments = ""
             else:
                 pythonw = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
                 if not os.path.exists(pythonw):
                     pythonw = sys.executable
                 target_path = pythonw
-                arguments = f'"{os.path.join(EXE_DIR, "app.py")}" --service'
+                arguments = f'"{os.path.join(EXE_DIR, "service.py")}"'
             
-            # Use ctypes to create shortcut (much faster than PowerShell)
-            import ctypes.wintypes
+            # Use PowerShell with shell=True to avoid hangs
+            ps_cmd = f'''$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('{STARTUP_SHORTCUT}'); $s.TargetPath = '{target_path}'; $s.Arguments = '{arguments}'; $s.WorkingDirectory = '{EXE_DIR}'; $s.Save()'''
+            os.system(f'powershell -Command "{ps_cmd}"')
             
-            # Write a simple .url file as fallback, or use VBScript which is faster than PS
-            vbs_script = f'''Set WshShell = CreateObject("WScript.Shell")
-Set Shortcut = WshShell.CreateShortcut("{STARTUP_SHORTCUT}")
-Shortcut.TargetPath = "{target_path}"
-Shortcut.Arguments = "{arguments}"
-Shortcut.WorkingDirectory = "{EXE_DIR}"
-Shortcut.Description = "Better Replay Buffer"
-Shortcut.Save'''
-            
-            vbs_path = os.path.join(TEMP, "create_shortcut.vbs")
-            with open(vbs_path, "w") as f:
-                f.write(vbs_script)
-            
-            subprocess.run(["cscript", "//nologo", vbs_path], capture_output=True, text=True, timeout=5)
-            
-            try:
-                os.remove(vbs_path)
-            except:
-                pass
-            
-            return True
+            return os.path.exists(STARTUP_SHORTCUT)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to enable startup: {e}")
             return False

@@ -15,6 +15,4 @@ dist/
 build/
 *.spec
 
-# Old files (replaced by modular structure)
-better-replay-buffer.pyw
-main.py
+installer_output/
