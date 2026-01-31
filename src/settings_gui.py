@@ -1,5 +1,5 @@
 """
-Better Replay Buffer - Settings GUI Module
+Ultra Replay Buffer - Settings GUI Module
 Configure and control the replay buffer service
 """
 
@@ -22,7 +22,7 @@ def run_gui():
         EXE_DIR = os.path.dirname(sys.executable)
         BUNDLE_DIR = sys._MEIPASS
         # Service is a separate exe
-        SERVICE_EXE = os.path.join(EXE_DIR, "BetterReplayBufferService.exe")
+        SERVICE_EXE = os.path.join(EXE_DIR, "OBS-Ultra-Replay-Buffer-Service.exe")
         SERVICE_CMD = [SERVICE_EXE]
     else:
         EXE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,8 +30,8 @@ def run_gui():
         SERVICE_CMD = [sys.executable, os.path.join(EXE_DIR, "service.py")]
         SERVICE_EXE = None
 
-    # Store settings in AppData (writeable without admin)
-    APPDATA_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("TEMP", ".")), "BetterReplayBuffer")
+    # Store settings in AppData
+    APPDATA_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("TEMP", ".")), "OBS-Ultra-Replay-Buffer")
     os.makedirs(APPDATA_DIR, exist_ok=True)
     SETTINGS_FILE = os.path.join(APPDATA_DIR, "settings.txt")
     TEMP = os.getenv("TEMP") or os.getenv("TMP") or "."
@@ -42,7 +42,7 @@ def run_gui():
 
     # Startup shortcut path
     STARTUP_FOLDER = os.path.join(os.getenv("APPDATA"), r"Microsoft\Windows\Start Menu\Programs\Startup")
-    STARTUP_SHORTCUT = os.path.join(STARTUP_FOLDER, "BetterReplayBuffer.lnk")
+    STARTUP_SHORTCUT = os.path.join(STARTUP_FOLDER, "OBS-Ultra-Replay-Buffer.lnk")
 
     # -------------------------------
     # Auto-detection functions
@@ -239,7 +239,7 @@ def run_gui():
         try:
             if getattr(sys, 'frozen', False):
                 # Launch the service exe directly on startup
-                target_path = os.path.join(EXE_DIR, "BetterReplayBufferService.exe")
+                target_path = os.path.join(EXE_DIR, "OBS-Ultra-Replay-Buffer-Service.exe")
                 arguments = ""
             else:
                 pythonw = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
@@ -314,8 +314,8 @@ def run_gui():
         """Check if service is running - by PID file or by process name"""
         procs = get_running_processes()
         
-        # Quick check: is any BetterReplayBufferService.exe running?
-        if "betterreplaybufferservice.exe" in procs:
+        # Quick check: is any OBS-Ultra-Replay-Buffer-Service.exe running?
+        if "obs-ultra-replay-buffer-service.exe" in procs:
             return True
         
         # Fallback: check PID file (for dev mode with python.exe)
@@ -335,7 +335,7 @@ def run_gui():
         return False
 
     def is_obs_running():
-        """Check if OBS is running using Windows API (instant)"""
+        """Check if OBS is running using Windows API"""
         procs = get_running_processes()
         return 'obs64.exe' in procs or 'obs32.exe' in procs
 
@@ -429,17 +429,24 @@ def run_gui():
         except Exception as e:
             messagebox.showerror("Error", f"Failed to start: {e}")
 
-    def get_my_process_tree():
-        """Not needed anymore - service is separate exe"""
-        return set()
-
     def kill_service_processes():
-        """Kill all BetterReplayBufferService.exe processes"""
-        # Kill by name
-        os.system('taskkill /F /IM BetterReplayBufferService.exe >nul 2>&1')
-        time.sleep(0.5)
-        # Kill again to be sure (PyInstaller parent/child)
-        os.system('taskkill /F /IM BetterReplayBufferService.exe >nul 2>&1')
+        """Kill all OBS-Ultra-Replay-Buffer-Service.exe processes"""
+        if getattr(sys, 'frozen', False):
+            # Kill by name
+            os.system('taskkill /F /IM OBS-Ultra-Replay-Buffer-Service.exe >nul 2>&1')
+            time.sleep(0.5)
+            # Kill again to be sure (PyInstaller parent/child)
+            os.system('taskkill /F /IM OBS-Ultra-Replay-Buffer-Service.exe >nul 2>&1')
+        else:
+            # Dev mode: kill by PID
+            if os.path.exists(PID_FILE):
+                try:
+                    with open(PID_FILE, "r") as f:
+                        pid = f.read().strip()
+                        if pid:
+                            os.system(f'taskkill /F /PID {pid} >nul 2>&1')
+                except:
+                    pass
         time.sleep(0.3)
         # Clean up files
         for f in [PID_FILE, LOCK_FILE]:
@@ -456,12 +463,9 @@ def run_gui():
             stop_obs()
         
         root.after(300, update_status)
-        if stopped_script or include_obs_var.get():
-            save_status_label.config(text="✓ Stopped!", fg="green")
-            root.after(2000, lambda: save_status_label.config(text=""))
-        else:
-            save_status_label.config(text="Script not running", fg="gray")
-            root.after(2000, lambda: save_status_label.config(text=""))
+        save_status_label.config(text="✓ Stopped!", fg="green")
+        root.after(2000, lambda: save_status_label.config(text=""))
+        update_status()
 
     def restart_script():
         # Kill all service processes
@@ -643,7 +647,7 @@ def run_gui():
 
     # Create window
     root = tk.Tk()
-    root.title("Better Replay Buffer")
+    root.title("Ultra Replay Buffer")
     root.geometry("800x380")
     root.resizable(True, True)
 

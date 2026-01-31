@@ -1,5 +1,5 @@
 """
-Better Replay Buffer - Background Service Module
+Ultra Replay Buffer - Background Service Module
 Monitors for new replay files and shows notifications
 """
 
@@ -31,7 +31,7 @@ def run_service():
     # -------------------------------
     # Set process name for Task Manager
     # -------------------------------
-    PROCESS_NAME = "BetterReplayBuffer"
+    PROCESS_NAME = "OBS-Ultra-Replay-Buffer"
     try:
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(PROCESS_NAME)
     except:
@@ -45,17 +45,17 @@ def run_service():
     # -------------------------------
     # Logging (use AppData for write access)
     # -------------------------------
-    APPDATA_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("TEMP", ".")), "BetterReplayBuffer")
+    APPDATA_DIR = os.path.join(os.getenv("LOCALAPPDATA", os.getenv("TEMP", ".")), "OBS-Ultra-Replay-Buffer")
     os.makedirs(APPDATA_DIR, exist_ok=True)
-    LOG_FILE = os.path.join(APPDATA_DIR, "better-replay-buffer.log")
-    logger = logging.getLogger("better-replay-buffer")
+    LOG_FILE = os.path.join(APPDATA_DIR, "ultra-replay-buffer.log")
+    logger = logging.getLogger("ultra-replay-buffer")
     logger.setLevel(logging.INFO)
     handler = RotatingFileHandler(LOG_FILE, maxBytes=1_000_000, backupCount=3, encoding="utf-8")
     formatter = logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    logger.info("Starting better-replay-buffer service")
+    logger.info("Starting ultra-replay-buffer service")
     logger.info(f"EXE_DIR: {EXE_DIR}, BUNDLE_DIR: {BUNDLE_DIR}")
 
     TEMP = os.getenv("TEMP") or os.getenv("TMP") or "."

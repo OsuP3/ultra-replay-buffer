@@ -1,5 +1,5 @@
 """
-Build script for Better OBS Replay Buffer
+Build script for OBS Ultra Replay Buffer
 Creates two executables: GUI and Service
 
 Usage:
@@ -12,9 +12,11 @@ import sys
 import os
 import shutil
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DIST_DIR = os.path.join(SCRIPT_DIR, "dist")
-BUILD_DIR = os.path.join(SCRIPT_DIR, "build")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))  # src/
+ROOT_DIR = os.path.dirname(SCRIPT_DIR)                   # project root
+ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
+DIST_DIR = os.path.join(ROOT_DIR, "dist")
+BUILD_DIR = os.path.join(ROOT_DIR, "build")
 
 def install_pyinstaller():
     """Install PyInstaller if not present"""
@@ -32,15 +34,19 @@ def clean():
             print(f"Removing {folder}")
             shutil.rmtree(folder)
     
-    # Remove spec files
-    for f in os.listdir(SCRIPT_DIR):
-        if f.endswith(".spec"):
-            os.remove(os.path.join(SCRIPT_DIR, f))
+    # Remove spec files from both src/ and root
+    for search_dir in [SCRIPT_DIR, ROOT_DIR]:
+        for f in os.listdir(search_dir):
+            if f.endswith(".spec"):
+                os.remove(os.path.join(search_dir, f))
 
 def build():
     """Build both executables"""
     install_pyinstaller()
     clean()
+
+    notification_wav = os.path.join(ASSETS_DIR, "notification.wav")
+    settings_example = os.path.join(ROOT_DIR, "settings.example.txt")
     
     # Build GUI exe
     print("\n=== Building Settings GUI ===")
@@ -48,12 +54,15 @@ def build():
         sys.executable, "-m", "PyInstaller",
         "--onefile",
         "--windowed",
-        "--name", "BetterReplayBuffer",
+        "--name", "OBS-Ultra-Replay-Buffer",
         "--icon", "NONE",
-        "--add-data", f"notification.wav;.",
-        "--add-data", f"settings.example.txt;.",
-        "settings_gui.py"
-    ], cwd=SCRIPT_DIR)
+        "--distpath", DIST_DIR,
+        "--workpath", BUILD_DIR,
+        "--specpath", ROOT_DIR,
+        "--add-data", f"{notification_wav};.",
+        "--add-data", f"{settings_example};.",
+        os.path.join(SCRIPT_DIR, "settings_gui.py")
+    ], cwd=ROOT_DIR)
     
     # Build Service exe
     print("\n=== Building Service ===")
@@ -61,24 +70,27 @@ def build():
         sys.executable, "-m", "PyInstaller",
         "--onefile",
         "--windowed",
-        "--name", "BetterReplayBufferService",
+        "--name", "OBS-Ultra-Replay-Buffer-Service",
         "--icon", "NONE",
-        "--add-data", f"notification.wav;.",
-        "service.py"
-    ], cwd=SCRIPT_DIR)
+        "--distpath", DIST_DIR,
+        "--workpath", BUILD_DIR,
+        "--specpath", ROOT_DIR,
+        "--add-data", f"{notification_wav};.",
+        os.path.join(SCRIPT_DIR, "service.py")
+    ], cwd=ROOT_DIR)
     
     # Copy additional files to dist
     print("\n=== Copying additional files ===")
     shutil.copy(
-        os.path.join(SCRIPT_DIR, "notification.wav"),
+        os.path.join(ASSETS_DIR, "notification.wav"),
         os.path.join(DIST_DIR, "notification.wav")
     )
     shutil.copy(
-        os.path.join(SCRIPT_DIR, "settings.example.txt"),
+        os.path.join(ROOT_DIR, "settings.example.txt"),
         os.path.join(DIST_DIR, "settings.example.txt")
     )
     shutil.copy(
-        os.path.join(SCRIPT_DIR, "README.md"),
+        os.path.join(ROOT_DIR, "README.md"),
         os.path.join(DIST_DIR, "README.md")
     )
     
@@ -101,9 +113,8 @@ def build():
     print("Zip the contents of the 'dist' folder.")
     print("\nUsers should:")
     print("  1. Extract to a folder")
-    print("  2. Double-click BetterReplayBuffer.exe to configure")
+    print("  2. Double-click OBS-Ultra-Replay-Buffer.exe to configure")
     print("  3. Click 'Start' or enable 'Run on Startup'")
-    print("\nThe same exe handles both settings and background service!")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "clean":

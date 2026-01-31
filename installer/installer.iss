@@ -1,10 +1,10 @@
-; Inno Setup Script for Better OBS Replay Buffer
+; Inno Setup Script for OBS Ultra Replay Buffer
 ; Download Inno Setup from: https://jrsoftware.org/isdl.php
 
-#define MyAppName "Better Replay Buffer"
+#define MyAppName "OBS Ultra Replay Buffer"
 #define MyAppVersion "1.0"
-#define MyAppPublisher "BetterReplayBuffer"
-#define MyAppExeName "BetterReplayBuffer.exe"
+#define MyAppPublisher "OBS-Ultra-Replay-Buffer"
+#define MyAppExeName "OBS-Ultra-Replay-Buffer.exe"
 
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
@@ -14,8 +14,8 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputDir=installer_output
-OutputBaseFilename=BetterReplayBuffer_Setup
+OutputDir=..\installer_output
+OutputBaseFilename=OBS_Ultra_Replay_Buffer_Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -30,11 +30,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "startupicon"; Description: "Run on Windows startup"; GroupDescription: "Startup:"; Flags: unchecked
 
 [Files]
-Source: "dist\BetterReplayBuffer.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\BetterReplayBufferService.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\notification.wav"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\settings.example.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\OBS-Ultra-Replay-Buffer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\OBS-Ultra-Replay-Buffer-Service.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\notification.wav"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\settings.example.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\README.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Start Menu shortcut (makes it searchable)
@@ -43,15 +43,15 @@ Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 ; Desktop shortcut (optional)
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 ; Startup shortcut (optional)
-Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: startupicon
+Name: "{userstartup}\OBS-Ultra-Replay-Buffer"; Filename: "{app}\{#MyAppExeName}"; Tasks: startupicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
 ; Kill the service before uninstalling
-Filename: "taskkill"; Parameters: "/F /IM BetterReplayBufferService.exe"; Flags: runhidden; RunOnceId: "KillService"
-Filename: "taskkill"; Parameters: "/F /IM BetterReplayBuffer.exe"; Flags: runhidden; RunOnceId: "KillGUI"
+Filename: "taskkill"; Parameters: "/F /IM OBS-Ultra-Replay-Buffer-Service.exe"; Flags: runhidden; RunOnceId: "KillService"
+Filename: "taskkill"; Parameters: "/F /IM OBS-Ultra-Replay-Buffer.exe"; Flags: runhidden; RunOnceId: "KillGUI"
 
 [UninstallDelete]
 ; Clean up settings and temp files

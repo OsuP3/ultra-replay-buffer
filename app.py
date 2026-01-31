@@ -1,5 +1,5 @@
 """
-Better Replay Buffer - Single Entry Point
+Ultra-Replay-Buffer
 ==========================================
 Run without arguments: Settings GUI
 Run with --service:    Background replay buffer service
@@ -21,11 +21,11 @@ else:
 def main():
     if "--service" in sys.argv:
         # Run the background service
-        from service import run_service
+        from src.service import run_service
         run_service()
     else:
         # Run the settings GUI
-        from settings_gui import run_gui
+        from src.settings_gui import run_gui
         run_gui()
 
 if __name__ == "__main__":
